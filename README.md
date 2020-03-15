@@ -1,3 +1,5 @@
+![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg) ![](https://parg.co/bDm)
+
 ![default](https://i.postimg.cc/2SVpd63d/image.png)
 
 # 深入浅出分布式系统
@@ -6,68 +8,63 @@
 
 所谓的分布式系统，其主要由网络、分布式存储与分布式计算等部分构成，分布式存储侧重于数据的读写存取及一致性等方面，而分布式计算则侧重于资源、任务的编排调度。
 
-# Preface | 前言
+# Introduction | 前言
 
-过去数十年间，信息技术的浪潮深刻地改变了这个社会的通信、交流与协作模式，我们熟知的互联网也经历了基于流量点击赢利的单方面信息发布的 Web 1.0 业务模式，转变为由用户主导而生成内容的 Web 2.0 业务模式；在可见的将来随着 3D 相关技术的落地，互联网应用系统所需处理的访问量和数据量必然会再次爆发性增长。
+## 无处不在的分布式系统
 
-## 分布式系统
+过去数十年间，信息技术的浪潮深刻地改变了这个社会的通信、交流与协作模式，我们熟知的互联网也经历了基于流量点击赢利的单方面信息发布的 Web 1.0 业务模式，转变为由用户主导而生成内容的 Web 2.0 业务模式；在可见的将来随着 3D 相关技术的落地，互联网应用系统所需处理的访问量和数据量必然会再次爆发性增长。正如凯文．凯利 2016 年在《失控》一书中指出，分布式系统具有四个突出特点，即没有强制性的中心控制、次级单位具有自治的特质、次级单位之间彼此高度链接、点对点之间的影响通过网络形成了非线性因果关系。凯文．凯利进一步指出，与其说一个分布式、去中心化的网络是一个物体，还不如说它是一个过程。
 
-从思想演进看，凯文．凯利 2016 年在《失控》一书中指出，分布式系统具有四个突出特点，即没有强制性的中心控制、次级单位具有自治的特质、次级单位之间彼此高度链接、点对点之间的影响通过网络形成了非线性因果关系。凯文．凯利进一步指出，与其说一个分布式、去中心化的网络是一个物体，还不如说它是一个过程。
+## 不可靠的分布式系统
 
-## 系统的扩展
+在 [《网络与时钟》](https://github.com/wx-chevalier/DistributedSystem-Series)中我们讨论了为何分布式系统是不可靠的；在[《高可用架构》](https://github.com/wx-chevalier/HA-Series)中我们会深入地讨论高可用分布式系统的特性，以及如何去保障系统的高可用。
 
-并发的增加对我们的后端架构提出了巨大的挑战，要求我们的系统弹性可扩展。
+## 一致性、共识与分布式事务
 
-![](https://i.postimg.cc/3Rqf3CBz/image.png)
+分布式系统的不可靠性是其内在属性，为了应对这种不可靠性，我们必然会进入到一致性、共识及分布式事务的领域。在分布式系统与数据库等技术领域中，一致性都会频繁地出现，但是在不同的语境和上下文中，它其实代表着不同的东西：
 
-上图从三个维度概括了一个系统的扩展过程：
+- 在事务的上下文中，比如 ACID 里的 C，指的就是通常的一致性（Consistency），即对数据的一组特定陈述必须始终成立。即不变量（invariants）。具体到分布式事务的上下文中这个不变量是：所有参与事务的节点状态保持一致：要么全部成功提交，要么全部失败回滚，不会出现一些节点成功一些节点失败的情况。
 
-- X 轴即水平复制，即在负载均衡服务器后增加多个 Web 服务器。
-- Z 轴是对数据库的扩展，即分库分表，分库是将关系紧密的表放在一台数据库服务器上，分表是因为一张表的数据太多，需要将一张表的数据通过 hash 放在不同的数据库服务器上。
-- Y 轴是业务方向的扩展，才能将巨型应用分解为一组不同的服务，将应用进一步分解为微服务（分库），例如订单管理中心、客户信息管理中心、商品管理中心等等。
+- 在分布式系统的上下文中，例如 CAP 里的 C，实际指的是线性一致性（Linearizability），即多副本的系统能够对外表现地像只有单个副本一样（系统保证从任何副本读取到的值都是最新的），且所有操作都以原子的方式生效（一旦某个新值被任一客户端读取到，后续任意读取不会再返回旧值）。
 
-总结而言，垂直伸缩只能通过增加服务器的配置有限度地提升系统的处理能力，而水平伸缩能够仅通过增减服务器数量相应地提升和降低系统的吞吐量；这种分布式系统架构，在理论上为吞吐量的提升提供了无限的可能。因此，用于搭建互联网应用的服务器也渐渐放弃了昂贵的小型机，转而采用大量的廉价 PC 服务器。
+- “一致性哈希”，“最终一致性”这些名词里的“一致性”也有不同的涵义。
 
-![](https://i.postimg.cc/YS9Y9xYy/image.png)
+在分布式系统中，我们常说的一致性模型有线性一致性、因果一致性、最终一致性等。线性一致性能使多副本数据看起来好像只有一个副本一样，并使其上所有操作都原子性地生效，它使数据库表现的好像单线程程序中的一个变量一样；但它有着速度缓慢的缺点，特别是在网络延迟很大的环境中。因果性对系统中的事件施加了顺序（什么发生在什么之前，基于因与果）。与线性一致不同，线性一致性将所有操作放在单一的全序时间线中，因果一致性为我们提供了一个较弱的一致性模型：某些事件可以是并发的，所以版本历史就像是一条不断分叉与合并的时间线。因果一致性没有线性一致性的协调开销，而且对网络问题的敏感性要低得多。
 
-在分布式系统的背景下，企业架构也由早期的单体式应用架构渐渐转为更加灵活的分布式应用架构，经历了单体分层架构、SOA 服务化架构、微服务架构、云原生架构等不同架构模式的变迁。后端开发不再局限于单一技术栈，并且为了应对更加庞大的集群规模，单纯的分布式系统已经难于驾驭，因此技术圈开启了一个概念爆发的时代：SOA、DevOps、容器、CI/CD、微服务、Service Mesh 等概念层出不穷，而 Docker、Kubernetes、Mesos、Spring Cloud、gRPC、Istio 等一系列产品的出现，标志着云时代已真正到来。
+但即使捕获到因果顺序（例如使用兰伯特时间戳），我们发现有些事情也不能通过这种方式实现：我们需要确保用户名是唯一的，并拒绝同一用户名的其他并发注册；如果一个节点要通过注册，则需要知道其他的节点没有在并发抢注同一用户名的过程中。这个问题引领我们走向共识。
 
-![服务端开发与架构全景图](https://s2.ax1x.com/2019/09/04/nE8T4x.png)
+达成共识意味着以这样一种方式决定某件事：所有节点一致同意所做决定，且这一决定不可撤销。共识问题通常形式化如下：一个或多个节点可以提议（propose）某些值，而共识算法决定采用其中的某个值。在保证分布式事务一致性的场景中，每个节点可以投票提议，并对谁是新的协调者达成共识。譬如 Raft 算法解决了全序广播问题，维护多副本日志间的一致性，其实就是让所有节点对同全局操作顺序达成一致，也其实就是让日志系统具有线性一致性。因而解决了共识问题。
 
-分布式场景下比较著名的难题就是 CAP 定理。CAP 定理认为，在分布式系统中，系统的一致性（Consistency）、可用性（Availability）、分区容忍性（Partition tolerance），三者不可能同时兼顾。在分布式系统中，由于网络通信的不稳定性，分区容忍性是必须要保证的，因此在设计应用的时候就需要在一致性和可用性之间权衡选择。互联网应用比企业级应用更加偏向保持可用性，因此通常用最终一致性代替传统事务的 ACID 强一致性。
+通过深入挖掘，结果我们发现很广泛的一系列问题实际上都可以归结为共识问题，并且彼此等价（从这个意义上来讲，如果你有其中之一的解决方案，就可以轻易将它转换为其他问题的解决方案）。这些等价的问题包括：
+
+- 线性一致性的 CAS 寄存器：寄存器需要基于当前值是否等于操作给出的参数，原子地决定是否设置新值。
+- 原子事务提交：数据库必须决定是否提交或中止分布式事务。
+- 全序广播：即保证消息不丢失，且消息以相同的顺序传递给每个节点。
+- 锁和租约：当几个客户端争抢锁或租约时，由锁来决定哪个客户端成功获得锁。
+- 成员/协调服务：给定某种故障检测器（例如超时），系统必须决定哪些节点活着，哪些节点因为会话超时需要被宣告死亡。
+- 唯一性约束：当多个事务同时尝试使用相同的键创建冲突记录时，约束必须决定哪一个被允许，哪些因为违反约束而失败。
+
+在分布式系统中，我们常常同时讨论分布式事务与共识，这是因为分布式事务本身的一致性是通过协调者内部的原子操作与多阶段提交协议保证的，不需要共识；但解决分布式事务一致性带来的可用性问题需要用到共识。为了保证分布式事务的一致性，分布式事务通常需要一个协调者（Coordinator）/事务管理器（Transaction Manager）来决定事务的最终提交状态。但无论 2PC 还是 3PC，都无法应对协调者失效的问题，而且具有扩大故障的趋势。这就牺牲了可靠性、可维护性与可扩展性。为了让分布式事务真正可用，就需要在协调者挂点的时候能赶快选举出一个新的协调者来解决分歧，这就需要所有节点对谁是领导者达成共识（Consensus）。
+
+在实际的系统演化过程中，最初的时候我们只有单节点，或者我们能够人为地去控制仅有的几个节点。但如果该领导者失效，或者如果网络中断导致领导者不可达，这样的系统就无法取得任何进展。应对这种情况可以有三种方法：
+
+- 等待领导者恢复，接受系统将在这段时间阻塞的事实。许多 XA/JTA 事务协调者选择这个选项。这种方法并不能完全达成共识，因为它不能满足终止属性的要求：如果领导者续命失败，系统可能会永久阻塞。
+- 人工故障切换，让人类选择一个新的领导者节点，并重新配置系统使之生效，许多关系型数据库都采用这种方方式。这是一种来自“天意”的共识，由计算机系统之外的运维人员做出决定。故障切换的速度受到人类行动速度的限制，通常要比计算机慢（得多）。
+- 使用算法自动选择一个新的领导者。这种方法需要一种共识算法，使用成熟的算法来正确处理恶劣的网络条件是明智之举。
+
+尽管单领导者数据库可以提供线性一致性，且无需对每个写操作都执行共识算法，但共识对于保持及变更领导权仍然是必须的。因此从某种意义上说，使用单个领导者不过是“缓兵之计”：共识仍然是需要的，只是在另一个地方，而且没那么频繁。像 ZooKeeper 这样的工具为应用提供了“外包”的共识、故障检测和成员服务。它们扮演了重要的角色，虽说使用不易，但总比自己去开发一个能经受所有问题考验的算法要好得多。如果你发现自己想要解决的问题可以归结为共识，并且希望它能容错，使用一个类似 ZooKeeper 的东西是明智之举。
+
+# Nav | 导读
+
+- 如果你想了解数据库相关，可以参阅 [Database-Series](https://github.com/wx-chevalier/Database-Series)。
+
+- 如果你想了解虚拟化与云计算相关，可以参阅 [Cloud-Series](https://github.com/wx-chevalier/Cloud-Series)。
+
+- 如果你想了解 Linux 与操作系统相关，可以参阅 [Linux-Series](https://github.com/wx-chevalier/Linux-Series)。
 
 # About
 
-## Copyright
+## Copyright & More | 延伸阅读
 
-![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg) ![](https://parg.co/bDm)
+笔者所有文章遵循 [知识共享 署名-非商业性使用-禁止演绎 4.0 国际许可协议](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh)，欢迎转载，尊重版权。您还可以前往 [NGTE Books](https://ng-tech.icu/books/) 主页浏览包含知识体系、编程语言、软件工程、模式与架构、Web 与大前端、服务端开发实践与工程架构、分布式基础架构、人工智能与深度学习、产品运营与创业等多类目的书籍列表：
 
-笔者所有文章遵循 [知识共享 署名-非商业性使用-禁止演绎 4.0 国际许可协议](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh)，欢迎转载，尊重版权。如果觉得本系列对你有所帮助，欢迎给我家布丁买点狗粮(支付宝扫码)~
-
-![default](https://i.postimg.cc/y1QXgJ6f/image.png)
-
-## Home & More | 延伸阅读
-
-![技术视野](https://s2.ax1x.com/2019/12/03/QQJLvt.png)
-
-您可以通过以下导航来在 Gitbook 中阅读笔者的系列文章，涵盖了技术资料归纳、编程语言与理论、Web 与大前端、服务端开发与基础架构、云计算与大数据、数据科学与人工智能、产品设计等多个领域：
-
-- 知识体系：《[Awesome Lists | CS 资料集锦](https://ngte-al.gitbook.io/i/)》、《[Awesome CheatSheets | 速学速查手册](https://ngte-ac.gitbook.io/i/)》、《[Awesome Interviews | 求职面试必备](https://github.com/wx-chevalier/Awesome-Interviews)》、《[Awesome RoadMaps | 程序员进阶指南](https://github.com/wx-chevalier/Awesome-RoadMaps)》、《[Awesome MindMaps | 知识脉络思维脑图](https://github.com/wx-chevalier/Awesome-MindMaps)》、《[Awesome-CS-Books | 开源书籍（.pdf）汇总](https://github.com/wx-chevalier/Awesome-CS-Books)》
-
-- 编程语言：《[编程语言理论](https://ngte-pl.gitbook.io/i/)》、《[Java 实战](https://github.com/wx-chevalier/Java-Series)》、《[JavaScript 实战](https://github.com/wx-chevalier/JavaScript-Series)》、《[Go 实战](https://ngte-pl.gitbook.io/i/go/go)》、《[Python 实战](https://ngte-pl.gitbook.io/i/python/python)》、《[Rust 实战](https://ngte-pl.gitbook.io/i/rust/rust)》
-
-- 软件工程、模式与架构：《[编程范式与设计模式](https://ngte-se.gitbook.io/i/)》、《[数据结构与算法](https://ngte-se.gitbook.io/i/)》、《[软件架构设计](https://ngte-se.gitbook.io/i/)》、《[整洁与重构](https://ngte-se.gitbook.io/i/)》、《[研发方式与工具](https://ngte-se.gitbook.io/i/)》
-
-* Web 与大前端：《[现代 Web 全栈开发与工程架构](https://ngte-web.gitbook.io/i/)》、《[数据可视化](https://ngte-fe.gitbook.io/i/)》、《[iOS](https://ngte-fe.gitbook.io/i/)》、《[Android](https://ngte-fe.gitbook.io/i/)》、《[混合开发与跨端应用](https://ngte-fe.gitbook.io/i/)》
-
-* 服务端开发实践与工程架构：《[服务端基础](https://ngte-be.gitbook.io/i/)》、《[微服务与云原生](https://ngte-be.gitbook.io/i/)》、《[测试与高可用保障](https://ngte-be.gitbook.io/i/)》、《[DevOps](https://ngte-be.gitbook.io/i/)》、《[Spring](https://github.com/wx-chevalier/Spring-Series)》、《[信息安全与渗透测试](https://ngte-be.gitbook.io/i/)》
-
-* 分布式基础架构：《[分布式系统](https://ngte-infras.gitbook.io/i/)》、《[分布式计算](https://ngte-infras.gitbook.io/i/)》、《[数据库](https://github.com/wx-chevalier/Database-Series)》、《[网络](https://ngte-infras.gitbook.io/i/)》、《[虚拟化与云计算](https://github.com/wx-chevalier/Cloud-Series)》、《[Linux 与操作系统](https://github.com/wx-chevalier/Linux-Series)》
-
-* 数据科学，人工智能与深度学习：《[数理统计](https://ngte-aidl.gitbook.io/i/)》、《[数据分析](https://ngte-aidl.gitbook.io/i/)》、《[机器学习](https://ngte-aidl.gitbook.io/i/)》、《[深度学习](https://ngte-aidl.gitbook.io/i/)》、《[自然语言处理](https://ngte-aidl.gitbook.io/i/)》、《[工具与工程化](https://ngte-aidl.gitbook.io/i/)》、《[行业应用](https://ngte-aidl.gitbook.io/i/)》
-
-* 产品设计与用户体验：《[产品设计](https://ngte-pd.gitbook.io/i/)》、《[交互体验](https://ngte-pd.gitbook.io/i/)》、《[项目管理](https://ngte-pd.gitbook.io/i/)》
-
-* 行业应用：《[行业迷思](https://github.com/wx-chevalier/Business-Series)》、《[功能域](https://github.com/wx-chevalier/Business-Series)》、《[电子商务](https://github.com/wx-chevalier/Business-Series)》、《[智能制造](https://github.com/wx-chevalier/Business-Series)》
-
-此外，你还可前往 [xCompass](https://wx-chevalier.github.io/home/#/search) 交互式地检索、查找需要的文章/链接/书籍/课程；或者在 [MATRIX 文章与代码索引矩阵](https://github.com/wx-chevalier/Developer-Zero-To-Mastery)中查看文章与项目源代码等更详细的目录导航信息。最后，你也可以关注微信公众号：『**某熊的技术之路**』以获取最新资讯。
+[![NGTE Books](https://s2.ax1x.com/2020/01/18/19uXtI.png)](https://ng-tech.icu/books/)
